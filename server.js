@@ -17,8 +17,22 @@ app.get('/', (req, res) => {
  *    quantity: number of trees promised over course of pa
  *    tree: what tree is being ordered
  */
-app.post('/create-pa',function(req,res){
-  res.send();
+app.post('/create-pa', async (req,res) => {
+  if(!req.body.tree || req.body.quantity == null){
+    res.statusMessage = "Did not recieve expected parameters";
+    res.status(400);
+  }
+  const errors = await Database.createPurchaseAgreementRow(req.body.quantity,req.body.tree);
+  if(!errors){
+    res.send(`Successfully created purchase agreement`);
+  }
+  if(errors === "ER_NO_REFERENCED_ROW_2"){
+    console.log("err detected")
+    res.statusMessage = "ERROR: Invalid tree entered";
+    res.status(400).end();
+  }
+  res.statusMessage = "ERROR: Unknown server error";
+  res.status(400).end();
 });
 
 /**
