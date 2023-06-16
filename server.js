@@ -19,8 +19,9 @@ app.get('/', (req, res) => {
  */
 app.post('/create-pa', async (req,res) => {
   if(!req.body.tree || req.body.quantity == null){
-    res.statusMessage = "Did not recieve expected parameters";
-    res.status(400);
+    res.status(400).send({
+      error:"ERROR: Did not recieve expected parameters"
+    });
   }
   const errors = await Database.createPurchaseAgreementRow(req.body.quantity,req.body.tree);
   if(!errors){
@@ -28,11 +29,13 @@ app.post('/create-pa', async (req,res) => {
   }
   if(errors === "ER_NO_REFERENCED_ROW_2"){
     console.log("err detected")
-    res.statusMessage = "ERROR: Invalid tree entered";
-    res.status(400).end();
+    res.status(400).send({
+      error:"ERROR: Invalid tree entered"
+    });
   }
-  res.statusMessage = "ERROR: Unknown server error";
-  res.status(400).end();
+  res.status(400).send({
+    error:"ERROR: Unknown server error"
+  });
 });
 
 /**
