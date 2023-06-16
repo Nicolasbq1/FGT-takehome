@@ -23,7 +23,7 @@ class Database{
             const overridenConnection = this.connection;
             overridenConnection.connect(function(err) {
                 if (err) throw err;
-                var create_tables = 
+                var createTables = 
                     "CREATE TABLE tree_inventory (name VARCHAR(255) NOT NULL PRIMARY KEY, current_inventory INTEGER DEFAULT 0 NOT NULL);"
                     + "CREATE TABLE purchase_agreements (uuid VARCHAR(255) NOT NULL PRIMARY KEY, quantity INTEGER NOT NULL, created_datetime DATETIME NOT NULL, tree VARCHAR(255) NOT NULL, FOREIGN KEY (tree) REFERENCES tree_inventory(name));"
                     + "CREATE TABLE purchase_orders (uuid VARCHAR(255) NOT NULL PRIMARY KEY, quantity INTEGER NOT NULL, created_datetime DATETIME NOT NULL, recieved_datetime DATETIME DEFAULT NULL,parent_pa VARCHAR(255) DEFAULT NULL, tree VARCHAR(255) NOT NULL, FOREIGN KEY (tree) REFERENCES tree_inventory(name), FOREIGN KEY (parent_pa) REFERENCES purchase_agreements(uuid));"
@@ -32,7 +32,7 @@ class Database{
                     + `INSERT INTO purchase_orders (uuid , quantity, created_datetime, tree) values ('STANDALONE_UUID', 1000, '${getCurrentDatetime()}', 'Fir');`
                     + `INSERT INTO purchase_orders (uuid , quantity, created_datetime, tree, parent_pa) values ('LINKED_UUID', 1000, '${getCurrentDatetime()}', 'Fir','TEST_UUID');`
                     + `INSERT INTO purchase_orders (uuid , quantity, created_datetime, recieved_datetime, tree) values ('COMPLETED_PO', 1000, '${getCurrentDatetime()}','${getCurrentDatetime()}', 'Fir');`
-                    overridenConnection.query(create_tables, (err,res) => {
+                    overridenConnection.query(createTables, (err,res) => {
                     if (err) throw err;
                     console.log("Tables created");
                 });

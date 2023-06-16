@@ -23,7 +23,10 @@ app.post('/create-pa', async (req,res) => {
       error:"ERROR: Did not recieve expected parameters"
     });
   }
-  const errors = await Database.createPurchaseAgreementRow(req.body.quantity,req.body.tree);
+  const tree = req.body.tree;
+  const quantity = req.body.quantity;
+  
+  const errors = await Database.createPurchaseAgreementRow(quantity,tree);
   if(!errors){
     return res.send(`Successfully created purchase agreement`);
   }
@@ -49,7 +52,10 @@ app.post('/create-po',async (req,res)=>{
       error:"ERROR: Did not recieve expected parameters"
     });
   }
-  const errors = await Database.createPurchaseOrderRow(req.body.quantity,req.body.tree);
+  const tree = req.body.tree;
+  const quantity = req.body.quantity;
+
+  const errors = await Database.createPurchaseOrderRow(quantity,tree);
   if(!errors){
     return res.send(`Successfully created purchase order`);
   }
@@ -76,16 +82,20 @@ app.post('/create-po-under-pa',async (req,res)=>{
       error:"ERROR: Did not recieve expected parameters"
     });
   }
-  const verifyPa = await Database.verifyPa(req.body.pa,req.body.tree);
+  const tree = req.body.tree;
+  const quantity = req.body.quantity;
+  const pa = req.body.pa;
+
+  const verifyPa = await Database.verifyPa(pa,tree);
   if(!verifyPa.valid){
     return res.status(400).send({
       error:verifyPa.errorMsg
     });
   }
 
-  const errors = await Database.createPurchaseOrderRowWithPA(req.body.quantity,req.body.tree,req.body.pa);
+  const errors = await Database.createPurchaseOrderRowWithPA(quantity,tree,pa);
   if(!errors){
-    return res.send(`Successfully created purchase order under pa ` + req.body.pa);
+    return res.send(`Successfully created purchase order under pa ` + pa);
   }
   return res.status(400).send({
     error:"ERROR: Unknown server error"
