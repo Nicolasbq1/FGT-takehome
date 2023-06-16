@@ -151,6 +151,70 @@ class Database{
         }
     }
 
+    async verifyPoUnderPa(purchaseOrderUUID){
+        let selectionQuery = `SELECT * FROM purchase_orders where uuid='${purchaseOrderUUID}';`;
+        try{
+            const res = await this.awaitedQuery(selectionQuery);
+            if(res.length === 0){
+                return {
+                    valid: false,
+                    errorMsg: "Error: Purchase order does not exist"
+                }
+            }
+            if(!res[0].parent_pa){
+                return {
+                    valid: false,
+                    errorMsg: "Error: Purchase order has no parent pa"
+                }
+            }
+            if(res[0].recieved_datetime){
+                return {
+                    valid: false,
+                    errorMsg: "Error: Purchase order has already been recieved"
+                }
+            }
+            return {
+                valid: true,
+                tree: res[0].tree,
+                quantity: res[0].quantity,
+                parentPa: res[0].parent_pa
+            };
+        }
+        catch(error){  
+            console.log("Error!: " + error.code);
+            console.log(error)
+            return {
+                valid: false,
+                errorMsg: "Unknown Error while validating purchase agreement"
+            };
+        }
+    }
+
+    async grabPaHistory(purchaseAgreementUUID){
+        let selectionQuery = `SELECT * FROM purchase_orders where parent_pa='${purchaseAgreementUUID}';`;
+        try{
+            const res = await this.awaitedQuery(selectionQuery);
+            if(res.length === 0){
+                return {
+                    valid: false,
+                    errorMsg: "Error: No purchase orders under PA (should not be possibles since we have validated this PO)"
+                }
+            }
+            return {
+                valid: true,
+                purchaseHistory: res
+            };
+        }
+        catch(error){  
+            console.log("Error!: " + error.code);
+            console.log(error)
+            return {
+                valid: false,
+                errorMsg: "Unknown Error while validating purchase agreement"
+            };
+        }
+    }
+
     async confirmReception(purchaseOrderUUID){
         let updateQuery = `UPDATE purchase_orders SET recieved_datetime='${getCurrentDatetime()}' where uuid='${purchaseOrderUUID}';`;
         try{

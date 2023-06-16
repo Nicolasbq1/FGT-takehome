@@ -92,14 +92,12 @@ app.post('/create-po-under-pa',async (req,res)=>{
   });
 });
 
-
-
 /**
  * Recieves a standalone purchase order
  * Expected body:
  *   po: uuid of po that is being recieved
  */
-app.put('/recieve-po', async (req,res)=>{
+app.put('/recieve-po', async (req,res) => {
   if(!req.body.po){
     return res.status(400).send({
       error:"ERROR: Did not recieve expected parameters"
@@ -125,8 +123,48 @@ app.put('/recieve-po', async (req,res)=>{
       error:updated.errorMsg
     });
   }
-
   return res.send("Sucessfully recieved PO");
+});
+
+/**
+ * Recieves a purchase order that should be under a referenced purchase agreement
+ * Expected body:
+ *   po: uuid of po that is being recieved (this po will need to be linked to a pa)
+ */
+app.put('/recieve-po-under-pa', async (req,res) => {
+  if(!req.body.po){
+    return res.status(400).send({
+      error:"ERROR: Did not recieve expected parameters"
+    });
+  }
+  const verifyPo = await Database.verifyPoUnderPa(req.body.po);
+  if(!verifyPo.valid){
+    return res.status(400).send({
+      error:verifyPo.errorMsg
+    });
+  }
+
+  const confirm = await Database.confirmReception(req.body.po);
+  if(!confirm.success){
+    return res.status(400).send({
+      error:confirm.errorMsg
+    });
+  }
+
+  const updated = await Database.updateTreeInventory(verifyPo.tree,verifyPo.quantity);
+  if(!updated.success){
+    return res.status(400).send({
+      error:updated.errorMsg
+    });
+  }
+
+  const grabPaHistory = await Database.grabPaHistory(verifyPo.parentPa);
+  if(!grabPaHistory.valid){
+    return res.status(400).send({
+      error:grabPaHistory.errorMsg
+    });
+  }
+  return res.send(grabPaHistory.purchaseHistory);
 });
 
 
