@@ -93,7 +93,13 @@ app.post('/create-po-under-pa',async (req,res)=>{
 });
 
 
-const recievePoHandler =  async (req,res)=>{
+
+/**
+ * Recieves a standalone purchase order
+ * Expected body:
+ *   po: uuid of po that is being recieved
+ */
+app.put('/recieve-po', async (req,res)=>{
   if(!req.body.po){
     return res.status(400).send({
       error:"ERROR: Did not recieve expected parameters"
@@ -121,21 +127,7 @@ const recievePoHandler =  async (req,res)=>{
   }
 
   return res.send("Sucessfully recieved PO");
-}
-
-/**
- * Recieves a standalone purchase order
- * Expected body:
- *   po: uuid of po that is being recieved
- */
-app.put('/recieve-po', recievePoHandler);
-
-/**
- * Recieves a purchase order that should be under a referenced purchase agreement
- * Expected body:
- *   po: uuid of po that is being recieved (this po will need to be linked to a pa)
- */
-app.put('/recieve-po-under-pa', recievePoHandler);
+});
 
 
 
